@@ -75,4 +75,4 @@ submission:
     - "Storage gaps ensure deterministic slot layout across versions"
 
   author:
-    repo: "https://github.com/<your-username>/token-vault-upgradeable"
+    repo: "https://github.com/the-sadanand/token-vault-upgradable.git"
