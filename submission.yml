@@ -1,0 +1,78 @@
+submission:
+  title: "TokenVault Upgradeable Smart Contract System"
+  description: >
+    Production-grade UUPS upgradeable TokenVault implementing a three-version
+    upgrade lifecycle (V1 → V2 → V3) with full storage layout management,
+    role-based access control, initializer security, and cross-version state
+    migration. Built with Hardhat + OpenZeppelin Upgrades.
+
+  versions:
+    - version: "V1"
+      contract: "contracts/TokenVaultV1.sol"
+      features:
+        - "UUPS proxy pattern with OpenZeppelin"
+        - "ERC-20 deposit with configurable fee (basis points)"
+        - "Net-balance withdrawal"
+        - "Role-based access control (DEFAULT_ADMIN_ROLE, UPGRADER_ROLE)"
+        - "Reentrancy protection via ReentrancyGuardUpgradeable"
+        - "50-slot storage gap for safe future upgrades"
+
+    - version: "V2"
+      contract: "contracts/TokenVaultV2.sol"
+      features:
+        - "Inherits all V1 functionality"
+        - "Simple-interest yield accrual (no compounding)"
+        - "Per-user yield snapshots updated on every balance-changing call"
+        - "claimYield() transfers accrued yield tokens to user"
+        - "Deposit pause / unpause (PAUSER_ROLE)"
+        - "reinitializer(2) for safe V2-specific initialisation"
+
+    - version: "V3"
+      contract: "contracts/TokenVaultV3.sol"
+      features:
+        - "Inherits all V1 + V2 functionality"
+        - "Time-delayed withdrawal queue (requestWithdrawal / executeWithdrawal)"
+        - "Single pending request per user; new request replaces the old one"
+        - "Emergency withdrawal bypasses delay (full balance, no request needed)"
+        - "Admin-configurable withdrawalDelay (seconds)"
+        - "reinitializer(3) for safe V3-specific initialisation"
+
+  architecture:
+    pattern: "UUPS (EIP-1822) via OpenZeppelin UUPSUpgradeable"
+    storage_strategy: "50-slot gap per contract in inheritance chain"
+    access_control: "OpenZeppelin AccessControlUpgradeable"
+    reentrancy: "OpenZeppelin ReentrancyGuardUpgradeable"
+    token_standard: "ERC-20 via SafeERC20"
+
+  testing:
+    framework: "Hardhat + Mocha + Chai"
+    files:
+      - "test/TokenVaultV1.test.js"
+      - "test/upgrade-v1-to-v2.test.js"
+      - "test/upgrade-v2-to-v3.test.js"
+      - "test/security.test.js"
+    coverage:
+      - "Happy-path deposit / withdraw / yield / emergency flows"
+      - "Failure-path (reverts, access control, insufficient balance)"
+      - "Upgrade state preservation across all version transitions"
+      - "Storage layout collision detection via OZ upgrades validator"
+      - "Function selector uniqueness across all versions"
+
+  toolchain:
+    node: ">=18"
+    hardhat: "^2.19"
+    openzeppelin_contracts_upgradeable: "^4.9"
+    openzeppelin_hardhat_upgrades: "^2.5"
+    solidity: "0.8.20"
+
+  security_considerations:
+    - "_disableInitializers() in every implementation constructor"
+    - "reinitializer(N) prevents double-initialisation across upgrades"
+    - "UPGRADER_ROLE separated from DEFAULT_ADMIN_ROLE"
+    - "PAUSER_ROLE separated so pause keys need not hold upgrade power"
+    - "CEI (Checks-Effects-Interactions) pattern in all state-changing functions"
+    - "SafeERC20 wrapping prevents silent transfer failures"
+    - "Storage gaps ensure deterministic slot layout across versions"
+
+  author:
+    repo: "https://github.com/<your-username>/token-vault-upgradeable"
